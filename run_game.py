@@ -1,17 +1,15 @@
 import pygame_boilerplate.engine as engine
-import pygame, components.renders
+import pygame, components.renders, gamemap
 
 
 class Game(engine.Engine):
 
     def preload(self):
         self.ui = components.renders.RenderGroup()
-
-        self.ui.add(engine.Button(topleft=(0, 0), text="Quit"), "quit_button")
         
-        button = engine.Button(text="HELLO")
+        button = engine.Button(text="QUIT GAME")
         button.rect.topleft = (self.screen_size[0] - button.rect.width, 0)
-        self.ui.add(button, "hello_button")
+        self.ui.add(button, "quit_button")
 
     def loop(self):
         
@@ -29,11 +27,11 @@ class Game(engine.Engine):
         
 
         #RENDERING:
-        for button in self.ui:
-            self.render_later(button)
+        self.ui.render_later(self)
+
 
     def cleanup(self):
-        """"""
+        print("GOODBYE!")
 
 def main():
     game = Game()

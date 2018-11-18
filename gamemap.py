@@ -1,12 +1,12 @@
-import random, noise, math
-
-WATER = 0
-LAND = 1
-MOUNTAIN = 2
+import random, noise, math, pygame
 
 class GameMap:
 
-    def __init__(self, seed, size = (10000, 10000), octaves = 12, percent_water = 0.3, percent_land = 0.1, percent_mountain = 0.6):
+    WATER = 0
+    LAND = 1
+    MOUNTAIN = 2
+
+    def __init__(self, seed = None, size = (300, 300), octaves = 7, percent_water = 0.3, percent_land = 0.6, percent_mountain = 0.1):
         self.size = size
 
         random.seed(seed)
@@ -54,18 +54,16 @@ class GameMap:
         Gets the land type of and x, y position of the gamemap.
         Land types are defined at the top of the gamemap module.
         """
-        global WATER
-        global LAND
-        global MOUNTAIN
 
         val = self.get_val(pos)
+        if val is None: return None
 
         if val >= 0 and val <= self.percent_water:
-            return WATER
+            return GameMap.WATER
         if val > self.percent_water and val <=  self.percent_water + self.percent_land:
-            return LAND
+            return GameMap.LAND
         if val > self.percent_water + self.percent_land and val <= 1.0:
-            return MOUNTAIN
+            return GameMap.MOUNTAIN
 
         return None
 
@@ -75,8 +73,8 @@ class GameMap:
         size = self.size
 
         #if outside of the bounds of the map, return None:
-        if pos[0] < 0 or pos[0] > size[0] or pos[1] < 0 or pos[1] > size[1]:
-            return  None
+        # if pos[0] < 0 or pos[0] > size[0] or pos[1] < 0 or pos[1] > size[1]:
+        #     return  None
 
         x_off = self.x_off
         y_off = self.y_off
@@ -95,31 +93,65 @@ class GameMap:
 
         return val
 
-    def get_chunk(self, rect):
-        """WARNING: this function can take a long time with large chunks."""
-        x_i = rect[0]
-        y_i = rect[1]
-        width = rect[2]
-        height = rect[3]
+    def get_rendering(self, rect, square_width)->pygame.Surface:
+        rendering = pygame.Surface((rect.width*square_width, rect.height*square_width))
+        filler = pygame.Surface((square_width, square_width))
+        for x in range(rect.topleft[0], rect.topleft[0] + rect.width):
+            for y in range(rect.topleft[1], rect.topleft[1] + rect.height):
+                land_type = self.get_land_type((x, y))
+                if land_type is None: 
+                    print("land type at ", (x, y), " is None. Skipping.")
+                    continue
+                color = (255, 0, 255) #error color
+                if land_type is GameMap.WATER: color = (50, 50, 160)
+                elif land_type is GameMap.LAND: color = (50, 160, 50)
+                elif land_type is GameMap.MOUNTAIN: color = (100, 100, 100) #IDK WHAT THIS IS
 
-        value_map = [0.0 for i in range(width*height)]
-        for x in range(0, width):
-            for y in range(0, height):
-                value_map[x*height + y] = self.get_val((x_i + x, y_i + y))
+                filler.fill(color)
+                rendering.blit(filler, (x*square_width, y*square_width))
 
-        return value_map
-                
+        return rendering
 
-#test:
 
-game_map = GameMap(None)
+def test():
+    game_map = GameMap(None)
 
-print(game_map.get_val((100, 100)))
+    print(game_map.get_val((1000, 1000)))
+    
+    import pygame
+    pygame.init()
+    scr_size = (800, 600)
+    square_width = 5
+    screen = pygame.display.set_mode(scr_size)
 
-for i in range(0, 1000):
-    pos = (0, i)
-    print(game_map.get_land_type(pos))
+    start_time = pygame.time.get_ticks()
+    rect = pygame.Rect(0, 0, scr_size[0]/20//square_width, scr_size[1]//square_width)
+    render_chunk = game_map.get_rendering(rect, square_width)
+    print(pygame.time.get_ticks() - start_time)
 
-chunk = game_map.get_chunk((100, 400, 500, 500))
-print(chunk)
+    pygame.display.flip()
 
+    print("press escape to end")
+    x = 100 
+    y = 100
+    clock = pygame.time.Clock()
+    pos = (0, 0)
+    while(True):
+
+        start_render = pygame.time.get_ticks()
+
+        additional_chunk = game_map.get_rendering(pygame.Rect(rect.width, 0, 4, rect.height), square_width)
+        additional_chunk.fill((255, 0, 0))
+
+        screen.blit(render_chunk, (-4*square_width, 0))
+        screen.blit(additional_chunk, (-4*square_width + rect.width*square_width, 0))
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                return
+
+        # print(pygame.time.get_ticks() - start_render, " ", 1000/60)
+
+        clock.tick(60)
