@@ -96,19 +96,23 @@ class GameMap:
     def get_rendering(self, rect, square_width)->pygame.Surface:
         rendering = pygame.Surface((rect.width*square_width, rect.height*square_width))
         filler = pygame.Surface((square_width, square_width))
+
         for x in range(rect.topleft[0], rect.topleft[0] + rect.width):
             for y in range(rect.topleft[1], rect.topleft[1] + rect.height):
                 land_type = self.get_land_type((x, y))
+
                 if land_type is None: 
-                    print("land type at ", (x, y), " is None. Skipping.")
+                    print("land type at ", (x, y), " is None. Skipping.") #TODO remove 'print' later for speed
                     continue
+
                 color = (255, 0, 255) #error color
+
                 if land_type is GameMap.WATER: color = (50, 50, 160)
                 elif land_type is GameMap.LAND: color = (50, 160, 50)
-                elif land_type is GameMap.MOUNTAIN: color = (100, 100, 100) #IDK WHAT THIS IS
+                elif land_type is GameMap.MOUNTAIN: color = (100, 100, 100) #TODO make a better color
 
                 filler.fill(color)
-                rendering.blit(filler, (x*square_width, y*square_width))
+                rendering.blit(filler, ((x - rect.topleft[0])*square_width, (y - rect.topleft[1])*square_width))
 
         return rendering
 
@@ -125,7 +129,7 @@ def test():
     screen = pygame.display.set_mode(scr_size)
 
     start_time = pygame.time.get_ticks()
-    rect = pygame.Rect(0, 0, scr_size[0]/20//square_width, scr_size[1]//square_width)
+    rect = pygame.Rect(-100, -100, scr_size[0]//square_width, scr_size[1]//square_width)
     render_chunk = game_map.get_rendering(rect, square_width)
     print(pygame.time.get_ticks() - start_time)
 
@@ -140,11 +144,10 @@ def test():
 
         start_render = pygame.time.get_ticks()
 
-        additional_chunk = game_map.get_rendering(pygame.Rect(rect.width, 0, 4, rect.height), square_width)
-        additional_chunk.fill((255, 0, 0))
+        screen.blit(render_chunk, (0, 0))
 
-        screen.blit(render_chunk, (-4*square_width, 0))
-        screen.blit(additional_chunk, (-4*square_width + rect.width*square_width, 0))
+        # rect = 
+        # render_chunk = game_map.get_rendering(rect, square_width)
 
         pygame.display.flip()
 
