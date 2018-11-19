@@ -11,11 +11,15 @@ class Game(engine.Engine):
         button.rect.topleft = (self.screen_size[0] - button.rect.width, 0)
         self.ui.add(button, "quit_button")
 
+        self.gamemap = gamemap.GameMap(size=(1000, 1000))
+        self.scrollmap = components.renders.ScrollMapRender(self.gamemap, pygame.Rect((100, 100), self.screen_size), square_width=1, scrollspeed=8)
+
     def loop(self):
         
         #UPDATING:
         self.eventcache.update()
         self.ui.update()
+        self.scrollmap.update()
 
 
         #CONTROL LOGIC:
@@ -28,6 +32,7 @@ class Game(engine.Engine):
 
         #RENDERING:
         self.ui.render_later(self)
+        self.render_later(self.scrollmap)
 
 
     def cleanup(self):
@@ -35,6 +40,6 @@ class Game(engine.Engine):
 
 def main():
     game = Game()
-    game.start([800, 600])
+    game.start([400, 300], pygame.FULLSCREEN)
 
 main()
