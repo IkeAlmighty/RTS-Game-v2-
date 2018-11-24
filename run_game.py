@@ -5,21 +5,29 @@ import pygame, components.renders, gamemap
 class Game(engine.Engine):
 
     def preload(self):
+        self.gamemap = gamemap.GameMapGenerator(size=(1000, 1000), percent_water=0.4, percent_mountain=0.4)
+
+        square_width = 3
+        self.bscrollmap = components.renders.BufferedScrollMap((0, 0), self.gamemap, square_width, scrollspeed=15)
+
+        #UI Stuff
         self.ui = components.renders.RenderGroup()
         
         button = engine.Button(text="QUIT GAME")
         button.rect.topleft = (self.screen_size[0] - button.rect.width, 0)
-        self.ui.add(button, "quit_button")
 
-        self.gamemap = gamemap.GameMap(size=(1000, 1000))
-        self.scrollmap = components.renders.ScrollMapRender(self.gamemap, pygame.Rect((100, 100), self.screen_size), square_width=1, scrollspeed=8)
+        minimap_pos = (0, self.screen_size[1] - 200)
+        minimap = components.renders.MiniMap(self.bscrollmap, pygame.Rect(minimap_pos, (200, 200)))
+        
+        self.ui.add(button, "quit_button")
+        self.ui.add(minimap, "minimap")
 
     def loop(self):
         
         #UPDATING:
         self.eventcache.update()
         self.ui.update()
-        self.scrollmap.update()
+        self.bscrollmap.update()
 
 
         #CONTROL LOGIC:
@@ -31,15 +39,18 @@ class Game(engine.Engine):
         
 
         #RENDERING:
+        self.render_later(self.bscrollmap) #this is the base tile, so it needs rendered first
         self.ui.render_later(self)
-        self.render_later(self.scrollmap)
 
+        #position of the scrollmap
+        self.render_later(components.renders.SurfRender(self.font.render(self.bscrollmap.get_pos().__str__(), True, (255, 255, 255), (0, 0, 0)), (0, 0)))
+        
 
     def cleanup(self):
-        print("GOODBYE!")
+        print("Goodbye")
 
 def main():
     game = Game()
-    game.start([400, 300], pygame.FULLSCREEN)
+    game.start([800, 600], pygame.FULLSCREEN, font_size=16)
 
 main()

@@ -18,6 +18,7 @@ class WorldInstance:
     def __init__(self, seed, size, square_width):
         #place all the initial entities in the world using
         #various noise functions
+        """"""
         
     
         

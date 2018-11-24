@@ -1,12 +1,14 @@
 import random, noise, math, pygame
 
-class GameMap:
+class GameMapGenerator:
+    """This GameMap Generator can be used for getting values of points and renderings of sections
+    of a gamemap."""
 
     WATER = 0
     LAND = 1
     MOUNTAIN = 2
 
-    def __init__(self, seed = None, size = (300, 300), octaves = 7, percent_water = 0.3, percent_land = 0.6, percent_mountain = 0.1):
+    def __init__(self, seed = None, size = (300, 300), octaves = 7, percent_water = 0.3, percent_mountain = 0.1):
         self.size = size
 
         random.seed(seed)
@@ -16,8 +18,13 @@ class GameMap:
 
         self.octaves = octaves
 
+        self.percent_land = 1.0 - percent_water - percent_mountain
+        if self.percent_land < 0.0 or self.percent_land + percent_mountain + percent_water != 1.0: 
+            #TODO: insert error into logs instead of printing:
+            print("gamemap land type percentages do not add up to 1.0")
+            import sys
+            sys.exit(-1)
         self.percent_water = percent_water
-        self.percent_land = percent_land
         self.percent_mountain = percent_mountain
 
         #Got to make a game, can't always spend time figuring things like
@@ -28,7 +35,7 @@ class GameMap:
         sample = []
 
         #save 10000 values
-        for i in range(0, 10000):
+        for i in range(0, 50000):
             #get a random position:
             x = random.randint(0, size[0])
             y = random.randint(0, size[1])
@@ -58,12 +65,12 @@ class GameMap:
         val = self.get_val(pos)
         if val is None: return None
 
-        if val >= 0 and val <= self.percent_water:
-            return GameMap.WATER
-        if val > self.percent_water and val <=  self.percent_water + self.percent_land:
-            return GameMap.LAND
-        if val > self.percent_water + self.percent_land and val <= 1.0:
-            return GameMap.MOUNTAIN
+        if val >= 0 and val <= self.percent_water + self.min_value:
+            return GameMapGenerator.WATER
+        if val > self.percent_water + self.min_value and val <=  self.min_value + self.percent_water + self.percent_land:
+            return GameMapGenerator.LAND
+        if val > self.min_value + self.percent_water + self.percent_land and val <= 1.0:
+            return GameMapGenerator.MOUNTAIN
 
         return None
 
@@ -72,9 +79,9 @@ class GameMap:
         returns None if the value is outside the map"""
         size = self.size
 
-        #if outside of the bounds of the map, return None:
-        # if pos[0] < 0 or pos[0] > size[0] or pos[1] < 0 or pos[1] > size[1]:
-        #     return  None
+        # if outside of the bounds of the map, return None
+        if pos[0] < 0 or pos[0] > size[0] or pos[1] < 0 or pos[1] > size[1]:
+            return  None
 
         x_off = self.x_off
         y_off = self.y_off
@@ -102,14 +109,14 @@ class GameMap:
                 land_type = self.get_land_type((x, y))
 
                 if land_type is None: 
-                    print("land type at ", (x, y), " is None. Skipping.") #TODO remove 'print' later for speed
+                    # print("land type at ", (x, y), " is None. Skipping.") #TODO remove 'print' later for speed
                     continue
 
                 color = (255, 0, 255) #error color
 
-                if land_type is GameMap.WATER: color = (50, 50, 160)
-                elif land_type is GameMap.LAND: color = (50, 160, 50)
-                elif land_type is GameMap.MOUNTAIN: color = (100, 100, 100) #TODO make a better color
+                if land_type is GameMapGenerator.WATER: color = (50, 50, 160)
+                elif land_type is GameMapGenerator.LAND: color = (50, 160, 50)
+                elif land_type is GameMapGenerator.MOUNTAIN: color = (76, 60, 3) #TODO make a better color
 
                 filler.fill(color)
                 rendering.blit(filler, ((x - rect.topleft[0])*square_width, (y - rect.topleft[1])*square_width))
@@ -118,7 +125,7 @@ class GameMap:
 
 
 def test():
-    game_map = GameMap(None)
+    game_map = GameMapGenerator(None, percent_water=0.4, percent_mountain=0.3)
 
     print(game_map.get_val((1000, 1000)))
     
@@ -129,7 +136,7 @@ def test():
     screen = pygame.display.set_mode(scr_size)
 
     start_time = pygame.time.get_ticks()
-    rect = pygame.Rect(-100, -100, scr_size[0]//square_width, scr_size[1]//square_width)
+    rect = pygame.Rect(100, 100, scr_size[0]//square_width, scr_size[1]//square_width)
     render_chunk = game_map.get_rendering(rect, square_width)
     print(pygame.time.get_ticks() - start_time)
 
@@ -145,9 +152,6 @@ def test():
         start_render = pygame.time.get_ticks()
 
         screen.blit(render_chunk, (0, 0))
-
-        # rect = 
-        # render_chunk = game_map.get_rendering(rect, square_width)
 
         pygame.display.flip()
 

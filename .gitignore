@@ -2,5 +2,5 @@ __pycache__
 *.bat
 designer
 .vscode
-asset_stage
+assets
 
