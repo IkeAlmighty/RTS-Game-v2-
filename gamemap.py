@@ -109,7 +109,6 @@ class GameMapGenerator:
                 land_type = self.get_land_type((x, y))
 
                 if land_type is None: 
-                    # print("land type at ", (x, y), " is None. Skipping.") #TODO remove 'print' later for speed
                     continue
 
                 color = (255, 0, 255) #error color
