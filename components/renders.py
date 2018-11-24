@@ -181,9 +181,9 @@ class BufferedScrollMap(engine.RenderableComponent):
             self.__image_pos[0] += self.scrollspeed
         if mouse_pos[0] > screen_size[0] - 5 and self.get_pos()[0] >= 0 - (self.get_image().get_width() - screen_size[0] - self.scrollspeed):
             self.__image_pos[0] -= self.scrollspeed
-        if mouse_pos[1] < 5: 
+        if mouse_pos[1] < 5 and self.get_pos()[1] <= 0 - self.scrollspeed: 
             self.__image_pos[1] += self.scrollspeed
-        if mouse_pos[1] > screen_size[1] - 5:
+        if mouse_pos[1] > screen_size[1] - 5 and self.get_pos()[1] >= 0 - (self.get_image().get_height() - screen_size[1] - self.scrollspeed):
             self.__image_pos[1] -= self.scrollspeed
 
 class MiniMap(engine.RenderableComponent):
