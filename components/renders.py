@@ -213,6 +213,9 @@ class MiniMap(engine.RenderableComponent):
         border.blit(self.__image, (5, 5))
         self.__image = border
 
+        #create the frame for where you are looking right now:
+        frame = pygame.Surface()
+
     def get_image(self):
         return self.__image
 
