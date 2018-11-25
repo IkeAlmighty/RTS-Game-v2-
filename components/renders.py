@@ -234,6 +234,26 @@ class SurfRender(engine.RenderableComponent):
     def update(self):
         pass
 
+class EntityRender(engine.RenderableComponent):
+
+    def __init__(self, spritesheet, entity):
+        self.__entity = entity
+        self.__spritesheet = spritesheet
+
+    def update(self):
+        """erase the last location of this entity, redraw it at its current location,
+        also change the sprite to the next sprite in the sprite sheet"""
+        
+        if self.__entity.physics_component.last_pos() != self.__entity.get_pos():
+            self.__spritesheet.next() #update sprite!
+            
+
+    def get_pos(self):
+        return self.__entity.get_pos()
+
+    def get_image(self):
+        return self.__spritesheet.get_image()
+
 def test():
 
     import gamemap
