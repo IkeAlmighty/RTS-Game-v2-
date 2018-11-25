@@ -29,7 +29,6 @@ class Game(engine.Engine):
         self.ui.update()
         self.bscrollmap.update()
 
-
         #CONTROL LOGIC:
         if self.eventcache.key_up(pygame.K_ESCAPE):
             self.running = False
@@ -51,6 +50,7 @@ class Game(engine.Engine):
 
 def main():
     game = Game()
+    gamebox.set_game(game)
     game.start([800, 600], pygame.FULLSCREEN, font_size=16)
 
 main()
