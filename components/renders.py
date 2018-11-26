@@ -26,7 +26,7 @@ class RenderGroup:
     def __iter__(self):
         return self.__components.values().__iter__()
 
-class BufferedScrollMap(engine.RenderableComponent):
+class BufferedScrollMap(engine.Renderable):
     """This scroll map loads an entire finitely large map, to allow for faster scrolling."""
 
     def __init__(self, pos, game_map, square_width, scrollspeed):
@@ -59,7 +59,7 @@ class BufferedScrollMap(engine.RenderableComponent):
         if mouse_pos[1] > screen_size[1] - 5 and self.get_pos()[1] >= 0 - (self.get_image().get_height() - screen_size[1] - self.scrollspeed):
             self.__image_pos[1] -= self.scrollspeed
 
-class MiniMap(engine.RenderableComponent):
+class MiniMap(engine.Renderable):
 
     def __init__(self, scrollmap, rect):
         """passed: scrollmap - either a buffered scroll map or a ScrollMap Object
@@ -95,7 +95,7 @@ class MiniMap(engine.RenderableComponent):
     def get_pos(self):
         return self.__pos
 
-class SurfRender(engine.RenderableComponent):
+class SurfRender(engine.Renderable):
 
     def __init__(self, surf, pos):
         self.surf = surf
@@ -110,7 +110,7 @@ class SurfRender(engine.RenderableComponent):
     def update(self):
         pass
 
-class EntityRender(engine.RenderableComponent):
+class EntityRender(engine.Renderable):
 
     def __init__(self, spritesheet, entity):
         self.__entity = entity
