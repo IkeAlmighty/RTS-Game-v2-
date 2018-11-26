@@ -49,6 +49,7 @@ class Game(engine.Engine):
         print("Goodbye")
 
 def main():
+    import gamebox
     game = Game()
     gamebox.set_game(game)
     game.start([800, 600], pygame.FULLSCREEN, font_size=16)

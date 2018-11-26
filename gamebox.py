@@ -1,7 +1,5 @@
 """A sandbox module for accessing and calling important parts of the game engine."""
 
-import run_game.Game
-
 __game = None
 
 def set_game(game):
