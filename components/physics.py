@@ -12,6 +12,9 @@ def create_object(class_name):
 
 class PhysicsComponent:
 
+    def __init__(self, entity):
+        self.entity = entity
+
     def update(self):
         raise NotImplementedError("Concrete PhysicsComponent must overwrite update(self)")
 
