@@ -12,7 +12,7 @@ class SpriteSheet:
         self.__index = 0
 
         #open file
-        large_image = pygame.image.load(filepath)
+        large_image = pygame.image.load("assets\\" + filepath)
 
         #parse out images, store in array
         self.__images = []
@@ -20,7 +20,6 @@ class SpriteSheet:
         
         for x in range(0, large_image.get_width() - 1):
             if large_image.get_at((x, 0)) == SpriteSheet.alpha: 
-                print("alpa value!")
                 last_x_start = x + 1
                 continue
             
@@ -63,7 +62,5 @@ def test():
         pygame.display.flip()
 
         clock.tick(2)
-
-test()
 
     

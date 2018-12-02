@@ -1,5 +1,5 @@
 import pygame_boilerplate.engine as engine
-import pygame, components.renders, gamemap
+import pygame, components.renders, gamemap, entities
 
 
 class Game(engine.Engine):
@@ -13,14 +13,22 @@ class Game(engine.Engine):
         #UI Stuff
         self.ui = components.renders.RenderGroup()
         
-        button = engine.Button(text="QUIT GAME")
-        button.rect.topleft = (self.screen_size[0] - button.rect.width, 0)
+        exit_button = engine.Button(text="QUIT GAME")
+        exit_button.rect.topleft = (self.screen_size[0] - exit_button.rect.width, 0)
 
         minimap_pos = (0, self.screen_size[1] - 200)
         minimap = components.renders.MiniMap(self.bscrollmap, pygame.Rect(minimap_pos, (200, 200)))
         
-        self.ui.add(button, "quit_button")
+        self.ui.add(exit_button, "quit_button")
         self.ui.add(minimap, "minimap")
+
+        #testing:
+        test_button = engine.Button(topleft = (0, 100), text="TEsT ME")
+
+        self.ui.add(test_button, "test_button")
+
+        self.entity_factory = entities.EntityFactory()
+        self.entity_factory.add_class("tree")
 
     def loop(self):
         
@@ -35,7 +43,10 @@ class Game(engine.Engine):
 
         if self.ui.get_by_id("quit_button").is_pressed():
             self.running = False
-        
+
+        if self.ui.get_by_id("test_button").is_pressed():
+            e = self.entity_factory.create("tree")
+            entities.add_entity(e)
 
         #RENDERING:
         self.render_later(self.bscrollmap) #this is the base tile, so it needs rendered first

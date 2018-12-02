@@ -1,4 +1,6 @@
 import gamebox, spritesheets, pygame, json
+import pygame_boilerplate.engine as engine
+import components.controls, components.physics
 
 __entity_set = []
 
@@ -10,7 +12,7 @@ def add_entity(entity):
 
     if entity not in __entity_set:
         __entity_set.append(entity)
-        entities.draw(entity)
+        draw(entity)
 
 def remove_entity(entity):
     """Removes the entity from entities module's entity list, and also 
@@ -21,13 +23,13 @@ def remove_entity(entity):
     for e in __entity_set:
         if e == entity:
             __entity_set.remove(e)
-            entities.erase(e)
+            erase(e)
 
 def draw(entity):
-    """erases the entity from the screen, redrawing
+    """erases the entity from the screen and redraws it, redrawing
     any entities that were partially erased in the process."""
 
-    entities.erase(entity)
+    erase(entity)
 
     gamebox.render_later(entity.graphics)
 
@@ -35,30 +37,37 @@ def erase(entity):
     """erases the entity from the screen, then redraws all entities
     that were erased in the process."""
 
+    rect = entity.physics.get_rect()
+    gamebox.render_later(components.renders.SurfRender(rect.size, rect.topleft))
+
     global __entity_set
 
     for e in __entity_set:
-        if e.physics.get_rect().colliderect(entity.physics.get_rect()):
+        if e.physics.get_rect().colliderect(rect):
             gamebox.render_later(e.graphics)
 
 
 class PhysicsComponent:
+    """"""
 
     def __init__(self, entity):
         """"""
+        self.entity = entity
 
     def update(self):
         """"""
 
     def get_pos(self):
         """"""
+        return self.get_rect().topleft
 
     def get_rect(self):
         """gets pygame.Rect object for this component"""
+        return self.entity.graphics.get_image().get_rect()
 
 class GraphicsComponent(engine.Renderable):
-    """RenderComponent for an entity. Entities with procedurally generated graphics
-    should contain a RenderComponent that subclasses this class and overwrites the 
+    """GhaphicsComponent for an entity. Entities with procedurally generated graphics
+    should contain a GraphicsComponent that subclasses this class and overwrites the 
     update() and get_image() methods."""
 
     def __init__(self, entity):
@@ -78,6 +87,7 @@ class ControlComponent:
 
     def __init__(self, entity):
         """"""
+        self.entity = entity
 
     def update(self):
         """"""
@@ -88,19 +98,20 @@ class EntityFactory:
         self.__class_dicts = {} #stores class properties in inner dictionaries,
         # with each dictionary keyed to the class name
 
-        self.__class_control_components = {} # maps class names to concrete control component classes
-
-        self.__class_physics_components = {} # maps class names to concrete physics component classes
-
     def add_class(self, entity_class_name):
         """Adds an and entity class by parsing the class info
         from a json file"""
         #parse json file:
-        class_dict = json.loads("entity_classes/" + entity_class_name + ".json")
+        file_content = open("entity_classes\\" + entity_class_name + ".json")
+        file_string = ""
+        for line in file_content:
+            file_string += line
+
+        class_dict = json.loads(file_string)
 
         #insert a new dictionary in the self.__class_dicts keyed to the class name
         try:
-            self.__class_dicts[class_dict.name] = class_dict
+            self.__class_dicts[class_dict["name"]] = class_dict
         except Exception:
             print("no key called 'name' in " + class_dict.__str__())
             return
@@ -109,26 +120,27 @@ class EntityFactory:
         """entity_class_name is a string that matches the class name
         of a file previosly read in using the add_class method"""
         # create and entity:
-        entity = Entity(self.__class_dicts[entity_class]["spritesheet"], entity_class)
+        entity = EntityFactory.Entity(self.__class_dicts[entity_class]["spritesheet"])
         
         # edit entity properties based on the dictionary entry that matches the
         # class name, if it exists:
         for instance_var in self.__class_dicts[entity_class]:
             entity.instance_vars[instance_var] = self.__class_dicts[entity_class][instance_var]
+        entity.graphics = GraphicsComponent(entity)
 
-        control_class =  self.__class_control_components.get(entity_class)
+        control_class = entity.get_property("control-class")
         if control_class is not None:
             entity.controls = components.controls.create_object(control_class) 
 
-        physics_class = self.__class_physics_components.get(entity_class)
-        if phyics_class is not None:
+        physics_class = entity.get_property("physics-class")
+        if physics_class is not None:
             entity.physics = components.physics.create_object(physics_class)
 
         return entity
 
     class Entity:
 
-        def __init__(self, spritesheet, class_name):
+        def __init__(self, spritesheet):
             """spritesheet encapsulates an array of images in a SpriteSheet object.
             It gets all it's values from externally defined json files"""
             self.instance_vars = {}
@@ -137,11 +149,9 @@ class EntityFactory:
             #the EntityFactory class. If no 
             self.physics = None
             self.controls = None
+            self.graphics = None
 
-            self.graphics = components.renders.EntityRender(spritesheet, self)
-            self.class_name = class_name
-
-        def get_property(property_name):
+        def get_property(self, property_name):
             """returns the property value as a string"""
             return self.instance_vars.get(property_name)
 
