@@ -10,6 +10,9 @@ class Game(engine.Engine):
         self.square_width = 3
         self.bscrollmap = components.renders.BufferedScrollMap((0, 0), self.gamemap, self.square_width, scrollspeed=15)
 
+        #subroutine that places starting entities on the map (such as trees and resources)
+        self.__populate_gamemap()
+
         #UI Stuff
         self.ui = components.renders.RenderGroup()
         
@@ -60,6 +63,17 @@ class Game(engine.Engine):
     def cleanup(self):
         pass
 
+    
+    def __populate_gamemap():
+        """populates the gamemap with trees, relics, and other starting resources"""
+        #trees:
+
+        #relics:
+
+
+
+
+#start the game:
 def main():
     import gamebox
     game = Game()

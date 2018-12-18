@@ -18,20 +18,31 @@ class PhysicsComponent:
         """"""
         self.entity = entity
 
-        self.__rect = pygame.Rect(0, 0, 0, 0)
-        self.__rect.center = center
+        self.__center = center
+        self.__rect = None
 
     def update(self):
         """"""
 
     def get_pos(self):
         """"""
+        if self.__rect == None: self.get_rect()
+        else: self.__center = self.__rect.center #makes sure the physicscomponent's center value is updated
         return self.__rect.topleft
 
     def get_rect(self):
         """gets pygame.Rect object for this component"""
         size = self.entity.graphics.get_image().get_rect().size
-        self.__rect = pygame.Rect(self.__rect.topleft, size)
+
+        if self.__rect == None:
+            self.__rect = pygame.Rect((0, 0), size)    
+            self.__rect.center = self.__center #then set the center! This is done because of lazy init,
+            #the idea being that none of the class methods are called until all the entity components
+            #are created.
+        else:
+            self.__rect = pygame.Rect(self.__rect.topleft, size)
+            self.__center = self.__rect.center #make sure the physicscomponent's center value is updated!
+
         return self.__rect.copy()
 
 ##########DEFINE THE PHYSICS COMPONENT CLASSES AFTER THIS LINE##############
