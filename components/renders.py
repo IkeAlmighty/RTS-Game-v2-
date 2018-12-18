@@ -59,6 +59,9 @@ class BufferedScrollMap(engine.Renderable):
         if mouse_pos[1] > screen_size[1] - 5 and self.get_pos()[1] >= 0 - (self.get_image().get_height() - screen_size[1] - self.scrollspeed):
             self.__image_pos[1] -= self.scrollspeed
 
+    def blit(self, surface, pos):
+        self.__image.blit(surface, pos)
+
 class MiniMap(engine.Renderable):
 
     def __init__(self, scrollmap, rect):

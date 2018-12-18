@@ -8,4 +8,4 @@ factory.add_class("tree")
 
 e = factory.create("tree")
 
-print(e.get_property("name"))
+print(e.physics)

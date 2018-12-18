@@ -25,7 +25,8 @@ class SpriteSheet:
             
             elif large_image.get_at((x + 1, 0)) == SpriteSheet.alpha or x + 1 >= large_image.get_width() - 1:
                 sprite_rect = pygame.Rect(last_x_start, 0, x - last_x_start, large_image.get_height())
-                self.__images.append(large_image.subsurface(sprite_rect).copy())
+                image = large_image.subsurface(sprite_rect).copy()
+                self.__images.append(image)
 
     def next(self):
         self.__index += 1
@@ -39,28 +40,6 @@ class SpriteSheet:
         return self.__images[self.__index]
 
 
-def test():
-
-    spritesheet = SpriteSheet("assets/tree_1.png")
-
-    pygame.init()
-
-    screen = pygame.display.set_mode((800, 600))
-
-    running = True
-
-    clock = pygame.time.Clock()
-
-    while running:
-        for event in pygame.event.get():
-            if event.type is pygame.KEYDOWN and event.key is pygame.K_ESCAPE:
-                running = False
-
-        screen.fill((0, 0, 0))
-        screen.blit(spritesheet.next(), (0, 0))
-
-        pygame.display.flip()
-
-        clock.tick(2)
+    
 
     

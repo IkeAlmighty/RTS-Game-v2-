@@ -12,7 +12,7 @@ def add_entity(entity):
 
     if entity not in __entity_set:
         __entity_set.append(entity)
-        draw(entity)
+        redraw(entity)
 
 def remove_entity(entity):
     """Removes the entity from entities module's entity list, and also 
@@ -25,45 +25,28 @@ def remove_entity(entity):
             __entity_set.remove(e)
             erase(e)
 
-def draw(entity):
+def redraw(entity):
     """erases the entity from the screen and redraws it, redrawing
     any entities that were partially erased in the process."""
 
     erase(entity)
 
-    gamebox.render_later(entity.graphics)
+    gamebox.render_to_scrollmap(entity.graphics)
 
 def erase(entity):
     """erases the entity from the screen, then redraws all entities
     that were erased in the process."""
 
     rect = entity.physics.get_rect()
-    gamebox.render_later(components.renders.SurfRender(rect.size, rect.topleft))
+    # gamebox.render_to_scrollmap(components.renders.SurfRender(pygame.Surface(rect.size), rect.topleft))
+    
+    gamebox.erase_scrollmap(rect)
 
     global __entity_set
 
     for e in __entity_set:
         if e.physics.get_rect().colliderect(rect):
-            gamebox.render_later(e.graphics)
-
-
-class PhysicsComponent:
-    """"""
-
-    def __init__(self, entity):
-        """"""
-        self.entity = entity
-
-    def update(self):
-        """"""
-
-    def get_pos(self):
-        """"""
-        return self.get_rect().topleft
-
-    def get_rect(self):
-        """gets pygame.Rect object for this component"""
-        return self.entity.graphics.get_image().get_rect()
+            gamebox.render_to_scrollmap(e.graphics)
 
 class GraphicsComponent(engine.Renderable):
     """GhaphicsComponent for an entity. Entities with procedurally generated graphics
@@ -83,14 +66,8 @@ class GraphicsComponent(engine.Renderable):
     def get_image(self):
         return self.__spritesheet.get_image()
 
-class ControlComponent:
-
-    def __init__(self, entity):
-        """"""
-        self.entity = entity
-
-    def update(self):
-        """"""
+    def get_pos(self):
+        return self.__entity.get_pos()
 
 class EntityFactory:
 
@@ -116,11 +93,11 @@ class EntityFactory:
             print("no key called 'name' in " + class_dict.__str__())
             return
 
-    def create(self, entity_class):
+    def create(self, entity_class, entity_pos):
         """entity_class_name is a string that matches the class name
         of a file previosly read in using the add_class method"""
         # create and entity:
-        entity = EntityFactory.Entity(self.__class_dicts[entity_class]["spritesheet"])
+        entity = EntityFactory.Entity()
         
         # edit entity properties based on the dictionary entry that matches the
         # class name, if it exists:
@@ -130,17 +107,17 @@ class EntityFactory:
 
         control_class = entity.get_property("control-class")
         if control_class is not None:
-            entity.controls = components.controls.create_object(control_class) 
+            entity.controls = components.controls.create_object(control_class, entity) 
 
         physics_class = entity.get_property("physics-class")
         if physics_class is not None:
-            entity.physics = components.physics.create_object(physics_class)
+            entity.physics = components.physics.create_object(physics_class, entity, entity_pos)
 
         return entity
 
     class Entity:
 
-        def __init__(self, spritesheet):
+        def __init__(self):
             """spritesheet encapsulates an array of images in a SpriteSheet object.
             It gets all it's values from externally defined json files"""
             self.instance_vars = {}
@@ -164,4 +141,4 @@ class EntityFactory:
             return self.graphics.get_image()
 
         def get_pos(self):
-            self.physics.get_pos()
+            return self.physics.get_pos()
